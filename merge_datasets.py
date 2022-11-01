@@ -63,10 +63,12 @@ def save_merged_to_csv(df_merged):
     df_merged.to_csv(filepath)
 
 # %%
-merge_datasets(
+save_merged_to_csv(
+    merge_datasets(
         get_life_expectancy_df(),
         get_meat_consumption_df(),
         get_world_gdp_df()
     )
+)
 
 # %%
