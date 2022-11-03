@@ -47,6 +47,12 @@ def get_gdp_per_capita_df():
 
     return df_gdp_per_capita
 
+def get_health_exp_df():
+    # Import CSV as Pandas DataFrame
+    df_health_exp = pd.read_csv("original_datasets/public-health-expenditure-share-GDP-OWID.csv").fillna("0")
+
+    return df_health_exp
+
 # %%
 def merge_datasets(base_df, added_df):
     return base_df.merge(
@@ -66,6 +72,7 @@ dfs = [
     get_meat_consumption_df(),
     get_child_mortality_df(),
     get_gdp_per_capita_df(),
+    get_health_exp_df()
 ]
 for df in dfs:
     df_merged = df if df_merged.empty else merge_datasets(
