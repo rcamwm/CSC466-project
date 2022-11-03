@@ -43,18 +43,22 @@ def get_world_gdp_df():
 
     return df_world_gdp
 
+def get_gdp_per_capita_df():
+    # Import CSV as Pandas DataFrame
+    df_gdp_per_capita = pd.read_csv("original_datasets/gdp-per-capita-worldbank.csv")
+
+    return df_gdp_per_capita
 # %% 
-def merge_datasets(df_life_expectancy, df_meat_consumption, df_world_gdp):
+def merge_datasets(df_life_expectancy, df_meat_consumption, df_gdp_per_capita):
     return df_life_expectancy[[
         "Entity", "Year", "Life Expectancy"
     ]].merge(
         df_meat_consumption,
         on=["Entity", "Year"]
     ).merge(
-        df_world_gdp,
+        df_gdp_per_capita,
         on=["Entity", "Year"]
     )
-    return df_one
 
 # %% 
 def save_merged_to_csv(df_merged):
@@ -63,12 +67,12 @@ def save_merged_to_csv(df_merged):
     df_merged.to_csv(filepath)
 
 # %%
-save_merged_to_csv(
-    merge_datasets(
-        get_life_expectancy_df(),
-        get_meat_consumption_df(),
-        get_world_gdp_df()
-    )
+df_merged = merge_datasets(
+    get_life_expectancy_df(),
+    get_meat_consumption_df(),
+    get_gdp_per_capita_df()
 )
+save_merged_to_csv(df_merged)
+df_merged
 
 # %%
