@@ -24,7 +24,6 @@ def get_meat_consumption_df():
 
     return df_meat_consumption
 
-# %% 
 def get_life_expectancy_df():
     # Import CSV as Pandas DataFrame
     df_life_expectancy = pd.read_csv("original_datasets/life-expectancy.csv").fillna("0")
@@ -36,42 +35,43 @@ def get_life_expectancy_df():
 
     return df_life_expectancy
 
-# %% 
-def get_world_gdp_df():
+def get_child_mortality_df():
     # Import CSV as Pandas DataFrame
-    df_world_gdp = pd.read_csv("original_datasets/country-regional-world-gdp.csv").fillna("0")
+    df_child_mortality = pd.read_csv("original_datasets/child-mortality-by-income-level-of-country.csv").fillna("0")
 
-    return df_world_gdp
+    return df_child_mortality
 
 def get_gdp_per_capita_df():
     # Import CSV as Pandas DataFrame
-    df_gdp_per_capita = pd.read_csv("original_datasets/gdp-per-capita-worldbank.csv")
+    df_gdp_per_capita = pd.read_csv("original_datasets/gdp-per-capita-worldbank.csv").fillna("0")
 
     return df_gdp_per_capita
-# %% 
-def merge_datasets(df_life_expectancy, df_meat_consumption, df_gdp_per_capita):
-    return df_life_expectancy[[
-        "Entity", "Year", "Life Expectancy"
-    ]].merge(
-        df_meat_consumption,
-        on=["Entity", "Year"]
-    ).merge(
-        df_gdp_per_capita,
-        on=["Entity", "Year"]
+
+# %%
+def merge_datasets(base_df, added_df):
+    return base_df.merge(
+        added_df,
+        on=["Entity", "Year"],
     )
 
-# %% 
 def save_merged_to_csv(df_merged):
     filepath = Path('updated_datasets/merged_dataset.csv')  
     filepath.parent.mkdir(parents=True, exist_ok=True)  
     df_merged.to_csv(filepath)
 
 # %%
-df_merged = merge_datasets(
+df_merged = pd.DataFrame(dtype="float64")
+dfs = [
     get_life_expectancy_df(),
     get_meat_consumption_df(),
-    get_gdp_per_capita_df()
-)
+    get_child_mortality_df(),
+    get_gdp_per_capita_df(),
+]
+for df in dfs:
+    df_merged = df if df_merged.empty else merge_datasets(
+        df_merged, df.loc[:, df.columns != 'Code']
+    )
+
 save_merged_to_csv(df_merged)
 df_merged
 
