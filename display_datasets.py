@@ -50,3 +50,12 @@ print_model = model.summary()
 print(print_model)
 
 # %%
+class object1:
+    def __init__(self, entity: str, year: int, gpa_per_capita: float) -> None:
+        self.entity = entity
+        self.year = year
+        self.gpa_per_capita = gpa_per_capita
+object1_list = []
+df.apply(lambda row : object1_list.append(object1(row['Entity'], row['Year'], row['GDP per capita (2017 international $)'])), axis = 1)
+
+# %%
