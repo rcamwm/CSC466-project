@@ -70,7 +70,9 @@ sns.pairplot(df[['GDP per capita (2017 international $)', 'Life Expectancy']])
 # %%
 K = range(1, 12)
 wss = []
-df_short = df[['Life Expectancy', 'GDP per capita (2017 international $)']]
+df_short = df.loc[
+    df['Year'] == 2005
+][['GDP per capita (2017 international $)', 'Life Expectancy']]
 for k in K:
     kmeans = cluster.KMeans(n_clusters=k, init='k-means++')
     kmeans = kmeans.fit(df_short)
@@ -80,7 +82,7 @@ mycenters = pd.DataFrame({'Clusters': K, 'WSS': wss})
 sns.lineplot(x='Clusters', y='WSS', data=mycenters, marker='*')
 
 # %%
-for i in range(3, 13):
+for i in range(3, 20):
     labels=cluster.KMeans(n_clusters=i, init='k-means++', random_state=200).fit(df_short).labels_
     print("Silhouette score for k(clusters) = " + str(i) + " is "
         + str(metrics.silhouette_score(df_short, labels, metric='euclidean', sample_size=1000, random_state=200)))
@@ -94,5 +96,11 @@ df['Clusters'] = kmeans.labels_
 df.head()
 df['Clusters'].value_counts()
 sns.scatterplot(x="GDP per capita (2017 international $)", y='Life Expectancy', hue='Clusters', data=df)
+
+# %%
+df.loc[
+    (df["Clusters"] == 0) &
+    (df["Year"] == 2005)
+]
 
 # %%
