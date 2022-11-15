@@ -10,6 +10,13 @@ import sklearn.cluster as cluster
 
 # %%
 def show_milk_breastcancer_graph(df, year):
+    '''
+    Display the scatter plot: Milk Comsumption (x-axis) vs Breast Cancer Rate (y-axis)
+
+            Parameters:
+                    df : pandas dataframe containing the info
+                    b (int): desired year to display the info
+    '''
     df.loc[
         df["Year"] == year
     ].plot(
@@ -21,6 +28,13 @@ def show_milk_breastcancer_graph(df, year):
     
 # %%
 def show_soy_breastcancer_graph(df, year):
+    '''
+    Display the scatter plot: Soy Comsumption (x-axis) vs Breast Cancer Rate (y-axis)
+
+            Parameters:
+                    df : pandas dataframe containing the info
+                    b (int): desired year to display the info
+    '''
     df.loc[
         df["Year"] == year
     ].plot(
@@ -32,6 +46,13 @@ def show_soy_breastcancer_graph(df, year):
 
 # %%
 def show_mutton_and_goat_graph(df, year):
+    '''
+    Display the scatter plot: Mutton and Goat Comsumption (x-axis) vs Life Expectancy (y-axis)
+
+            Parameters:
+                    df : pandas dataframe containing the info
+                    b (int): desired year to display the info
+    '''
     df.loc[
         df["Year"] == year
     ].plot(
@@ -42,9 +63,11 @@ def show_mutton_and_goat_graph(df, year):
     )
 
 # %% 
+# read in the dataset
 df = pd.read_csv("updated_datasets/merged_dataset.csv")
 
 # %%
+# fit the data with OLS regression and display a table containing the result
 x = df[["Mutton and Goat Consumption", "Beef and Buffallo Consumption", "Pigmeat Consumption", "Poultry Consumption", "Other Meats Consumption"]]
 y = df["Life Expectancy"]
 regr = linear_model.LinearRegression()
@@ -66,8 +89,8 @@ df.apply(lambda row : object1_list.append(object1(row['Entity'], row['Year'], ro
 # %%
 sns.pairplot(df[['GDP per capita (2017 international $)', 'Life Expectancy']])
 
-# find # of clusters
 # %%
+# find # of clusters with silhoutette score. 1 -> best, -1 -> worst
 K = range(1, 12)
 wss = []
 df_short = df.loc[
@@ -82,6 +105,7 @@ mycenters = pd.DataFrame({'Clusters': K, 'WSS': wss})
 sns.lineplot(x='Clusters', y='WSS', data=mycenters, marker='*')
 
 # %%
+# print out the silhotette score for cluster 3 - 20
 for i in range(3, 20):
     labels=cluster.KMeans(n_clusters=i, init='k-means++', random_state=200).fit(df_short).labels_
     print("Silhouette score for k(clusters) = " + str(i) + " is "
@@ -89,6 +113,7 @@ for i in range(3, 20):
 
 # k-means clustering
 # %%
+# plot the clusters based on the best result from the previous step.
 kmeans = cluster.KMeans(n_clusters=3, init='k-means++')
 kmeans = kmeans.fit(df[['Life Expectancy', 'GDP per capita (2017 international $)']])
 kmeans.cluster_centers_
