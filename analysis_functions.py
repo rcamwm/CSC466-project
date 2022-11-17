@@ -5,6 +5,17 @@ import seaborn as sns
 import sklearn.metrics as metrics
 import sklearn.cluster as cluster
 
+def filter_year(df, year):
+    '''
+    Returns a pandas DataFrame with data corresponding to a single year
+
+    df : pandas.DataFrame
+    year : int, year to return data for, must be at least 1990 and at most 2017
+    '''
+    return df.loc[
+        df['Year'] == year
+    ]
+
 def ols_regression_model_summary(df, X_cols, y_col):
     '''
     Fit the data with OLS regression and return a table containing the result
@@ -21,15 +32,16 @@ def ols_regression_model_summary(df, X_cols, y_col):
     model = sm.OLS(y, X).fit()
     return model.summary()
 
-def plot_elbow_method_k_means(df, max_k):
+def plot_elbow_method_k_means(df, cols, max_k):
     '''
     Calculates within-cluster-sum of squared errors (WSS) for different values of k
     
     df : pandas.DataFrame
+    cols : list[str], each entry should match to a column in df
     max_k : int, the maximum k to test for k-means clusters, not inclusive
     '''
     k_range = range(1, max_k)
-    wss = [cluster.KMeans(n_clusters=k, init='k-means++').fit(df).inertia_ for k in k_range]
+    wss = [cluster.KMeans(n_clusters=k, init='k-means++').fit(df[cols]).inertia_ for k in k_range]
     mycenters = pd.DataFrame({'Clusters': k_range, 'Within-Cluster-Sum of Squared Errors': wss})
     sns.lineplot(
         x='Clusters', 
@@ -38,7 +50,7 @@ def plot_elbow_method_k_means(df, max_k):
         marker='*'
     )
 
-def get_silhouette_score_df(df, max_k):
+def get_silhouette_score_df(df, cols, max_k):
     '''
     Return a pandas DataFrame of the silhouette scores 
     of a dataset for a range of values of k for k-means clustering.
@@ -46,19 +58,19 @@ def get_silhouette_score_df(df, max_k):
     A score of 1 is the best possible, while a score of -1 is the worst possible
 
     df : pandas.DataFrame
+    cols : list[str], each entry should match to a column in df
     max_k : int, the maximum k to test for k-means clusters, not inclusive
             must be 4 or greater
     '''
-    
     silhouettes = pd.DataFrame({"k": range(3, max_k)})
     silhouettes["Silhouette Score for k(clusters)"] = silhouettes.apply(
         lambda row: metrics.silhouette_score(
-            df, 
+            df[cols], 
             cluster.KMeans(
                 n_clusters=row["k"], 
                 init='k-means++',
                 random_state=200
-            ).fit(df).labels_, 
+            ).fit(df[cols]).labels_, 
             metric='euclidean', 
             sample_size=1000, 
             random_state=200
