@@ -63,7 +63,7 @@ def merge_datasets(base_df, added_df):
 def save_merged_to_csv(df_merged):
     filepath = Path('updated_datasets/merged_dataset.csv')  
     filepath.parent.mkdir(parents=True, exist_ok=True)  
-    df_merged.to_csv(filepath)
+    df_merged.to_csv(filepath, index = False)
 
 # %%
 df_merged = pd.DataFrame(dtype="float64")

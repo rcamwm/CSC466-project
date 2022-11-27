@@ -1,24 +1,113 @@
 import pandas as pd
-from sklearn import linear_model
-import statsmodels.api as sm
 import seaborn as sns
-import sklearn.metrics as metrics
 import sklearn.cluster as cluster
+import sklearn.metrics as metrics
+import statsmodels.api as sm
+
+from itertools import combinations
+from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import StackingRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+def get_cv_average_error(df, features, prediction):
+    '''
+    Find the average error when using cross validation
+    on a DataFrame, given a list of features and a 
+    column to predict
+
+    df : pandas.DataFrame
+    features : list[], each entry should match to a column in df
+    prediction : str, should match to a column in df
+    '''
+    pipeline = make_pipeline(
+        StandardScaler(),
+        LinearRegression()
+    )
+    cv_errs = -cross_val_score(
+        pipeline, 
+        X=df[features],
+        y=df[prediction],
+        scoring="neg_mean_squared_error", 
+        cv=10
+    )
+    return cv_errs.mean()
+
+def get_cv_error_for_k(df, features, prediction, k):
+    '''
+    calculate average error test error for a value of k
+    when using cross validation on a DataFrame, 
+    given features and a column to predict
+
+    df : pandas.DataFrame
+    features : list[], each entry should match to a column in df
+    prediction : str, should match to a column in df
+    k : int, a value of k for k-nearest neighbors
+    '''
+    pipeline = make_pipeline(
+        StandardScaler(),
+        KNeighborsRegressor(n_neighbors=k)
+    )
+
+    # calculate errors from cross-validation
+    cv_errs = -cross_val_score(
+        pipeline, 
+        X=df[features], 
+        y=df[prediction],
+        scoring="neg_mean_squared_error", 
+        cv=10
+    )
+    # calculate average of the cross-validation errors
+    return cv_errs.mean()
+
+def get_stacking_model(df, X_cols, y_col, neighbor_count):
+    '''
+    Creates a stacked model
+    '''
+    linear_model = LinearRegression()
+    linear_model.fit(X=df[X_cols], y=df[y_col])
+
+    knn_model = make_pipeline(
+        StandardScaler(),
+        KNeighborsRegressor(n_neighbors=neighbor_count)
+    )
+    knn_model.fit(X=df[X_cols], y=df[y_col])
+
+    stacking_model = StackingRegressor([
+        ("linear", linear_model), 
+        ("knn", knn_model)],
+        final_estimator=LinearRegression()
+    )
+    stacking_model.fit(X=df[X_cols], y=df[y_col])
+    return stacking_model
 
 def filter_year(df, year):
     '''
-    Returns a pandas DataFrame with data corresponding to a single year
+    Returns two pandas DataFrames.
+    First DataFrame has data corresponding to a single year,
+    Second DataFrame has data corresponding to all data EXCEPT that year
 
     df : pandas.DataFrame
     year : int, year to return data for, must be at least 1990 and at most 2017
     '''
-    return df.loc[
-        df['Year'] == year
-    ]
+    return df.loc[df['Year'] == year], df.loc[df['Year'] != year]
 
-def ols_regression_model_summary(df, X_cols, y_col):
+def get_list_combinations(features):
     '''
-    Fit the data with OLS regression and return a table containing the result
+    Returns a list of all possible combinations of a list of features
+
+    features : list[]
+    '''
+    list_combinations = []
+    for n in range(len(features) + 1):
+        list_combinations += list(combinations(features, n))
+    return list_combinations
+
+def ols_regression_model(df, X_cols, y_col):
+    '''
+    Fit the data with OLS regression and return a model containing the result
 
     df : pandas.DataFrame
     X_cols : list[str], each entry should match to a column in df
@@ -26,11 +115,9 @@ def ols_regression_model_summary(df, X_cols, y_col):
     '''
     X = df[X_cols]
     y = df[y_col]
-    regr = linear_model.LinearRegression()
-    regr.fit(X, y)
     X = sm.add_constant(X)
     model = sm.OLS(y, X).fit()
-    return model.summary()
+    return model
 
 def plot_elbow_method_k_means(df, cols, max_k):
     '''
