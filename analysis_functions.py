@@ -24,7 +24,8 @@ def get_cv_average_error(df, features, prediction):
     '''
     pipeline = make_pipeline(
         StandardScaler(),
-        LinearRegression()
+        # 4 nearest neighbors is arbitrary starting point
+        KNeighborsRegressor(n_neighbors=4)
     )
     cv_errs = -cross_val_score(
         pipeline, 
@@ -37,7 +38,7 @@ def get_cv_average_error(df, features, prediction):
 
 def get_cv_error_for_k(df, features, prediction, k):
     '''
-    calculate average error test error for a value of k
+    Calculate average error test error for a value of k
     when using cross validation on a DataFrame, 
     given features and a column to predict
 
@@ -61,6 +62,27 @@ def get_cv_error_for_k(df, features, prediction, k):
     )
     # calculate average of the cross-validation errors
     return cv_errs.mean()
+
+def get_best_k(df, features, prediction, max_k):
+    '''
+    Calculate average CV errors for different values of k
+
+    df : pandas.DataFrame
+    features : list[], each entry should match to a column in df
+    prediction : str, should match to a column in df
+    max_k : int, the maximum possible value of k for k-nearest neighbors
+    '''
+    k_errors = pd.Series(dtype='float64')
+    for k in range(2, max_k): 
+        k_errors[str(k)] = get_cv_error_for_k(
+            df, 
+            features,
+            prediction,
+            k
+        )
+    return int(k_errors.loc[
+        k_errors == k_errors.max()
+    ].index.values[0])
 
 def get_stacking_model(df, X_cols, y_col, neighbor_count):
     '''
@@ -94,14 +116,17 @@ def filter_year(df, year):
     '''
     return df.loc[df['Year'] == year], df.loc[df['Year'] != year]
 
-def get_list_combinations(features):
+def get_list_combinations(features, r=-1):
     '''
     Returns a list of all possible combinations of a list of features
 
     features : list[]
+    r : int, possible number of features per combination.
+            If -1, uses length of features list
     '''
+    feature_count = len(features) if r == -1 else r
     list_combinations = []
-    for n in range(len(features) + 1):
+    for n in range(feature_count + 1):
         list_combinations += list(combinations(features, n))
     return list_combinations
 

@@ -24,6 +24,28 @@ def get_meat_consumption_df():
 
     return df_meat_consumption
 
+def get_milk_consumption_df():
+    # Import CSV as Pandas DataFrame
+    df_milk_consumption = pd.read_csv(
+        "original_datasets/per-capita-milk-consumption.csv"
+    ).fillna("0")
+
+    # Rename columns
+    df_milk_consumption.columns = ["Entity", "Code", "Year", "Milk Consumption"]
+
+    return df_milk_consumption
+
+def get_cancer_df():
+    # Import CSV as Pandas DataFrame
+    df_cancer = pd.read_csv(
+        "original_datasets/share-of-population-with-cancer-types.csv"
+    ).fillna("0")
+
+    # Rename columns
+    df_cancer.columns = [(col if " - " not in col else col.split(" - ")[1]) for col in df_cancer.columns]
+
+    return df_cancer
+
 def get_life_expectancy_df():
     # Import CSV as Pandas DataFrame
     df_life_expectancy = pd.read_csv("original_datasets/life-expectancy.csv").fillna("0")
@@ -70,9 +92,11 @@ df_merged = pd.DataFrame(dtype="float64")
 dfs = [
     get_life_expectancy_df(),
     get_meat_consumption_df(),
+    get_milk_consumption_df(),
+    get_cancer_df(),
     get_child_mortality_df(),
     get_gdp_per_capita_df(),
-    get_health_exp_df()
+    get_health_exp_df(),
 ]
 for df in dfs:
     df_merged = df if df_merged.empty else merge_datasets(
