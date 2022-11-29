@@ -35,6 +35,28 @@ def get_milk_consumption_df():
 
     return df_milk_consumption
 
+def get_alcohol_df():
+    # Import CSV as Pandas DataFrame
+    df_alcohol = pd.read_csv(
+        "original_datasets/alcohol-consumption-rates.csv"
+    ).fillna("0")
+
+    # Rename columns
+    df_alcohol.columns = ["Entity", "Code", "Year", "Alcohol Consumption"]
+
+    return df_alcohol
+
+def get_smoking_df(): 
+    # Import CSV as Pandas DataFrame
+    df_smoking = pd.read_csv(
+        "original_datasets/smoking-rates.csv"
+    ).fillna("0")
+
+    # Rename columns
+    df_smoking.columns = ["Entity", "Code", "Year", "Smoking Rates"]
+
+    return df_smoking
+
 def get_cancer_df():
     # Import CSV as Pandas DataFrame
     df_cancer = pd.read_csv(
@@ -45,6 +67,16 @@ def get_cancer_df():
     df_cancer.columns = [(col if " - " not in col else col.split(" - ")[1]) for col in df_cancer.columns]
 
     return df_cancer
+
+def get_obesity_df():
+    # Import CSV as Pandas DataFrame
+    df_obesity = pd.read_csv(
+        "original_datasets/share-of-adults-defined-as-obese.csv"
+    ).fillna("0")
+
+    df_obesity.columns = ["Entity", "Code", "Year", "Obesity Rate"]
+
+    return df_obesity
 
 def get_life_expectancy_df():
     # Import CSV as Pandas DataFrame
@@ -94,6 +126,7 @@ dfs = [
     get_meat_consumption_df(),
     get_milk_consumption_df(),
     get_cancer_df(),
+    get_obesity_df(),
     get_child_mortality_df(),
     get_gdp_per_capita_df(),
     get_health_exp_df(),
